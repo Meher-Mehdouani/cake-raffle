@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>🍰 Cake Raffle – Sweet Prize Draw!</title>
+  <!-- Google Material Icons (official fonts) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Also include Material Icons Outlined for variety if needed, but standard icons work beautifully -->
+  <style>
+    /* ----------------------------------------------
+      GLOBAL RESET & BASE STYLES
+      Makes sure everything uses consistent box sizing
+      and removes default margins/paddings for a clean start.
+    ------------------------------------------------ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ----------------------------------------------
+      BACKGROUND with Google Material Icon cake pattern + gradient
+      We add a semi-transparent repeating material cake icon in the background
+      using pseudo-element. This gives a delightful bakery vibe.
+    ------------------------------------------------ */
+    body {
+      /* Warm gradient overlay + a subtle pattern behind */
+      background: linear-gradient(145deg, rgba(255, 218, 185, 0.92), rgba(255, 235, 215, 0.96));
+      min-height: 100vh;
+      padding: 0.8rem;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* BACKGROUND CAKE ICON PATTERN using Material Icons */
+    body::before {
+      content: "cake\00a0cake\00a0cake\00a0cake\00a0cake\00a0cake\00a0cake\00a0cake";
+      font-family: 'Material Icons';
+      font-size: 3.5rem;
+      color: rgba(255, 140, 100, 0.12);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      pointer-events: none;   /* Allows clicking through the icons */
+      z-index: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+      letter-spacing: 20px;
+      transform: rotate(-10deg) scale(1.2);
+    }
+
+    /* Add second layer for richer background texture */
+    body::after {
+      content: "🍰\00a0🧁\00a0🍰\00a0🧁\00a0🍰\00a0🧁\00a0🍰\00a0🧁";
+      font-family: 'Segoe UI', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+      font-size: 2.8rem;
+      color: rgba(255, 180, 130, 0.08);
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: flex-end;
+      transform: rotate(5deg);
+    }
+
+    /* ----------------------------------------------
+      MAIN APP CARD – COMPACT SIZE + 0.65 transparency
+      Semi-transparent glass card with Material design elevation.
+    ------------------------------------------------ */
+    .raffle-container {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;  /* Above background icons */
+      background: rgba(255, 248, 240, 0.68);  /* 0.65-0.7 transparency glass effect */
+      backdrop-filter: blur(10px);
+      border-radius: 48px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    /* ---------- HEADER SECTION with Material Cake Icon ---------- */
+    .cake-header {
+      background-color: rgba(255, 64, 129, 0.92);
+      padding: 1rem 0.8rem;
+      text-align: center;
+      border-bottom: 3px solid #ffb7cf;
+    }
+
+    .cake-header h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: white;
+      text-shadow: 1px 1px 0 #b22b5c;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Google Material Icon inside H1 - cake icon */
+    .cake-header h1 .material-icons {
+      font-size: 2rem;
+      color: #fff9e0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    }
+
+    .cake-header p {
+      color: #fff1e6;
+      font-weight: 500;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    /* ---------- MAIN CONTENT with tighter spacing ---------- */
+    .raffle-body {
+      padding: 1rem;
+    }
+
+    /* ----- ENTRY FORM SECTION (compact) ----- */
+    .entry-form {
+      background: rgba(255, 250, 245, 0.85);
+      border-radius: 32px;
+      padding: 0.9rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid rgba(255, 224, 204, 0.9);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .form-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #c73d6f;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Input field – compact touch-friendly */
+    .form-group input {
+      flex: 3;
+      min-width: 140px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      border: 2px solid #ffccda;
+      border-radius: 50px;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    .form-group input:focus {
+      border-color: #ff4081;
+      box-shadow: 0 0 0 2px rgba(255, 64, 129, 0.2);
+    }
+
+    /* Add participant button */
+    .btn-add {
+      flex: 1;
+      background-color: #ff6b9d;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.05s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-add:hover {
+      background-color: #e91e63;
+      transform: scale(0.97);
+    }
+
+    .btn-add:active {
+      background-color: #c2185b;
+      transform: scale(0.96);
+    }
+
+    /* ----- PARTICIPANTS LIST SECTION ----- */
+    .participants-section {
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 28px;
+      padding: 0.1rem 0 0.8rem 0;
+      margin-bottom: 1.2rem;
+      border: 1px solid rgba(255, 224, 208, 0.9);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      padding: 0.6rem 0.9rem 0.2rem 0.9rem;
+      border-bottom: 2px dashed #ffdbdb;
+    }
+
+    .section-header h2 {
+      font-size: 1rem;
+      color: #cb3f70;
+      font-weight: 700;
+    }
+
+    .badge-count {
+      background: #ffecf0;
+      padding: 2px 10px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #d63e72;
+    }
+
+    .participant-list {
+      list-style: none;
+      padding: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 90px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .participant-item {
+      background: #fce4ec;
+      padding: 5px 12px;
+      border-radius: 35px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ad2a55;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: inset 0 0 0 1px white, 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .participant-item .remove-btn {
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #b3426a;
+      font-weight: bold;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.1s;
+    }
+
+    .participant-item .remove-btn:hover {
+      background: #ffb7c9;
+      color: #a1234f;
+    }
+
+    .empty-message {
+      color: #bf9f8a;
+      font-style: italic;
+      padding: 0.8rem 0;
+      text-align: center;
+      width: 100%;
+      font-size: 0.8rem;
+    }
+
+    /* ----- WINNER DISPLAY AREA (cake & party + material icon flair) ----- */
+    .winner-area {
+      background: rgba(255, 243, 232, 0.88);
+      border-radius: 32px;
+      padding: 0.9rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      border: 2px dotted #ffb48a;
+      transition: all 0.2s;
+    }
+
+    .winner-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #b95b7a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .winner-name {
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4081, #ff8c42);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin: 6px 0 4px;
+      word-break: break-word;
+    }
+
+    .winner-emoji {
+      font-size: 2rem;
+      letter-spacing: 6px;
+      margin-top: 3px;
+    }
+
+    .no-winner-message {
+      font-size: 0.9rem;
+      color: #d49c7c;
+      font-weight: 500;
+      padding: 0.2rem;
+    }
+
+    /* ----- BUTTONS CONTAINER (Draw + Reset) ----- */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-draw {
+      background: linear-gradient(105deg, #ff4081, #ff6e46);
+      border: none;
+      padding: 10px 16px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 5px 12px rgba(255, 64, 129, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      min-width: 130px;
+    }
+
+    .btn-draw:hover {
+      background: linear-gradient(105deg, #f12d6e, #ff5722);
+      transform: scale(1.01);
+    }
+
+    .btn-draw:active {
+      transform: scale(0.97);
+    }
+
+    .btn-draw:disabled {
+      opacity: 0.5;
+      transform: none;
+      cursor: not-allowed;
+      background: #b0b0b0;
+      box-shadow: none;
+    }
+
+    .btn-reset {
+      background-color: #007bff;
+      border: none;
+      padding: 10px 16px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 5px 10px rgba(0, 123, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      min-width: 130px;
+    }
+
+    .btn-reset:hover {
+      background-color: #1367c0;
+      transform: scale(1.01);
+    }
+
+    .btn-reset:active {
+      transform: scale(0.97);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.6rem;
+      color: #aa7e68;
+      padding: 0.6rem;
+      border-top: 1px solid rgba(255, 224, 208, 0.7);
+      margin-top: 0.3rem;
+    }
+
+    /* Additional material icon inside winner area or small touches */
+    .material-icons.small {
+      font-size: 1rem;
+      vertical-align: middle;
+    }
+
+    /* Responsive: even smaller screens */
+    @media (max-width: 550px) {
+      body {
+        padding: 0.5rem;
+      }
+      .raffle-container {
+        max-width: 95%;
+        border-radius: 40px;
+      }
+      .raffle-body {
+        padding: 0.8rem;
+      }
+      .cake-header h1 {
+        font-size: 1.35rem;
+      }
+      .cake-header h1 .material-icons {
+        font-size: 1.6rem;
+      }
+      .form-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-add {
+        white-space: normal;
+        padding: 8px 12px;
+      }
+      .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .btn-draw, .btn-reset {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+      .winner-name {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="raffle-container">
+  <!-- HEADER with Google Material Icon (cake icon inside H1 as requested) -->
+  <header class="cake-header">
+    <h1>
+      <span class="material-icons">cake</span> <!-- Material cake icon -->
+      CAKE RAFFLE
+      <span class="material-icons">celebration</span> <!-- extra party icon for fun -->
+    </h1>
+    <p>Enter & win a sweet surprise! 🧁</p>
+  </header>
+
+  <div class="raffle-body">
+    <!-- Entry Form Section -->
+    <div class="entry-form">
+      <div class="form-title">
+        <span class="material-icons" style="font-size: 1.2rem;">person_add</span>
+        Join the raffle
+      </div>
+      <div class="form-group">
+        <input type="text" id="participantName" placeholder="Your name here..." autocomplete="off" />
+        <button class="btn-add" id="addButton">➕ Add me</button>
+      </div>
+    </div>
+
+    <!-- Participants List Container -->
+    <div class="participants-section">
+      <div class="section-header">
+        <h2><span class="material-icons" style="font-size: 1rem;">cake</span> Sweet participants</h2>
+        <div class="badge-count" id="participantCount">0</div>
+      </div>
+      <ul class="participant-list" id="participantList">
+        <li class="empty-message">✨ No one joined yet — be the first! ✨</li>
+      </ul>
+    </div>
+
+    <!-- Winner Display Area (cake + party emoji) -->
+    <div class="winner-area" id="winnerArea">
+      <div class="winner-label">
+        <span class="material-icons" style="font-size: 1.2rem;">emoji_events</span>
+        LUCKY WINNER
+        <span class="material-icons" style="font-size: 1.2rem;">celebration</span>
+      </div>
+      <div id="winnerDisplay">
+        <div class="no-winner-message">🎲 Click "DRAW" to pick a winner 🎲</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons: Draw + Reset -->
+    <div class="action-buttons">
+      <button class="btn-draw" id="drawButton">
+        <span class="material-icons" style="font-size: 1.2rem;">casino</span> DRAW WINNER 🎂
+      </button>
+      <button class="btn-reset" id="resetButton">
+        <span class="material-icons" style="font-size: 1.2rem;">refresh</span> RESET
+      </button>
+    </div>
+    <div class="footer-note">
+      <span class="material-icons" style="font-size: 0.7rem;">cake</span> Fair chance | Tap ✖ to remove | Reset clears all
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CAKE RAFFLE WEB APP - WITH GOOGLE MATERIAL ICONS
+  // ============================================================
+  // Features:
+  // 1. Google Material Icons integrated (cake icon inside H1 + background cake icons)
+  // 2. Store participants in an array & render dynamically.
+  // 3. Add participants with validation (non-empty, no duplicates).
+  // 4. Remove individual participants using ✖ button.
+  // 5. Draw random winner → displays name + cake 🎂 + party 🎉 emojis.
+  // 6. Reset button clears participants array and winner display.
+  // 7. Fully responsive, compact front page with 0.65 transparency card.
+  // 8. Background includes repeating material cake icons via pseudo-element.
+  // 
+  // Each line commented for clarity.
+  // ============================================================
+
+  // ---------- DATA STORAGE ----------
+  let participants = [];
+
+  // DOM elements
+  const nameInput = document.getElementById('participantName');
+  const addButton = document.getElementById('addButton');
+  const participantListEl = document.getElementById('participantList');
+  const participantCountSpan = document.getElementById('participantCount');
+  const drawButton = document.getElementById('drawButton');
+  const winnerDisplayDiv = document.getElementById('winnerDisplay');
+  const resetButton = document.getElementById('resetButton');
+
+  // ---------- HELPER FUNCTIONS ----------
+  
+  // Renders the participant list from the array
+  function renderParticipantList() {
+    participantListEl.innerHTML = '';
+
+    if (participants.length === 0) {
+      const emptyLi = document.createElement('li');
+      emptyLi.className = 'empty-message';
+      emptyLi.textContent = '🍰 No participants yet — add your name! 🍰';
+      participantListEl.appendChild(emptyLi);
+    } else {
+      participants.forEach((name, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'participant-item';
+        listItem.innerHTML = `
+          <span>🍥 ${escapeHtml(name)}</span>
+          <button class="remove-btn" data-index="${index}" aria-label="Remove participant">✖</button>
+        `;
+        participantListEl.appendChild(listItem);
+      });
+
+      // Attach remove event listeners
+      const removeButtons = document.querySelectorAll('.participant-item .remove-btn');
+      removeButtons.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const indexToRemove = parseInt(btn.getAttribute('data-index'), 10);
+          removeParticipantByIndex(indexToRemove);
+        });
+      });
+    }
+
+    participantCountSpan.textContent = participants.length;
+    drawButton.disabled = participants.length === 0;
+  }
+
+  function removeParticipantByIndex(index) {
+    if (index >= 0 && index < participants.length) {
+      participants.splice(index, 1);
+      renderParticipantList();
+      resetWinnerDisplay();
+    }
+  }
+
+  function resetWinnerDisplay() {
+    winnerDisplayDiv.innerHTML = `
+      <div class="no-winner-message">🎲 Click "DRAW" to pick a winner 🎲</div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function addParticipant() {
+    let rawName = nameInput.value.trim();
+    
+    if (rawName === "") {
+      alert("🍰 Please enter a name to join the raffle! 🍰");
+      return;
+    }
+    
+    const isDuplicate = participants.some(p => p.toLowerCase() === rawName.toLowerCase());
+    if (isDuplicate) {
+      alert(`🎈 "${rawName}" is already in the raffle! Each person gets one entry. 🎈`);
+      return;
+    }
+    
+    participants.push(rawName);
+    nameInput.value = '';
+    renderParticipantList();
+    resetWinnerDisplay();
+    nameInput.focus();
+  }
+
+  function drawRandomWinner() {
+    if (participants.length === 0) {
+      alert("No participants yet! Add at least one name to draw a winner 🎂");
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * participants.length);
+    const winnerName = participants[randomIndex];
+    
+    const winnerHtml = `
+      <div class="winner-name">🎊 ${escapeHtml(winnerName)} 🎊</div>
+      <div class="winner-emoji">🍰🎉🎂✨🎈</div>
+      <div style="margin-top: 5px; font-size: 0.8rem;">🥳 Congrats! You won the cake! 🥳</div>
+    `;
+    
+    winnerDisplayDiv.innerHTML = winnerHtml;
+    
+    const winnerArea = document.getElementById('winnerArea');
+    winnerArea.style.transition = "background 0.2s";
+    winnerArea.style.backgroundColor = "#fff0d6";
+    setTimeout(() => {
+      winnerArea.style.backgroundColor = "rgba(255, 243, 232, 0.88)";
+    }, 300);
+  }
+
+  function resetRaffle() {
+    participants.length = 0;   // clear array
+    renderParticipantList();
+    resetWinnerDisplay();
+    nameInput.value = '';
+    nameInput.focus();
+  }
+
+  // ----- EVENT LISTENERS -----
+  addButton.addEventListener('click', addParticipant);
+  nameInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addParticipant();
+    }
+  });
+  drawButton.addEventListener('click', drawRandomWinner);
+  resetButton.addEventListener('click', resetRaffle);
+  
+  // Initial render
+  renderParticipantList();
+  resetWinnerDisplay();
+  nameInput.focus();
+</script>
+</body>
+</html>
